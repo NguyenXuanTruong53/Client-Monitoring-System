@@ -1,3 +1,5 @@
+import MultithreadedSocketServer.MultithreadedSocketServer;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
@@ -7,6 +9,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JTable;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class FormServer extends JFrame {
 
@@ -59,10 +63,15 @@ public class FormServer extends JFrame {
 		JLabel lblNewLabel_3_1 = new JLabel("New label");
 		lblNewLabel_3_1.setBounds(103, 69, 46, 14);
 		contentPane.add(lblNewLabel_3_1);
-		
-		JButton btnNewButton = new JButton("New button");
-		btnNewButton.setBounds(44, 102, 89, 23);
-		contentPane.add(btnNewButton);
+
+		JButton btnKetNoi = new JButton("Kết nối");
+		btnKetNoi.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MultithreadedSocketServer.run_server();
+			}
+		});
+		btnKetNoi.setBounds(44, 102, 89, 23);
+		contentPane.add(btnKetNoi);
 		
 		table = new JTable();
 		table.setBounds(24, 161, 388, 89);

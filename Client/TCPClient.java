@@ -24,4 +24,28 @@ public class TCPClient {
             System.out.println(e);
         }
     }
+    public static int run_client(String host, int port){
+        try{
+            Socket socket=new Socket(host, port);
+            DataInputStream inStream=new DataInputStream(socket.getInputStream());
+            DataOutputStream outStream=new DataOutputStream(socket.getOutputStream());
+            BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+            String clientMessage="",serverMessage="";
+            while(!clientMessage.equals("bye")){
+                System.out.println("Enter number :");
+                clientMessage=br.readLine();
+                outStream.writeUTF(clientMessage);
+                outStream.flush();
+                serverMessage=inStream.readUTF();
+                System.out.println(serverMessage);
+
+            }
+            outStream.close();
+            outStream.close();
+            socket.close();
+        }catch(Exception e){
+            return 0;
+        }
+        return 1;
+    }
 }
