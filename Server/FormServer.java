@@ -23,24 +23,43 @@ public class FormServer extends JFrame {
 
 	private JPanel contentPane;
 	private JTable table;
-	private DefaultTableModel model = new DefaultTableModel();
+	public DefaultTableModel model = new DefaultTableModel();
 	private JTable table_server = new JTable(model);
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		FormServer frame = new FormServer();
+		frame.setVisible(true);
+		try{
+			ServerSocket server=new ServerSocket(8888);
+			int counter=0;
+			System.out.println("Server Started ....");
+			while(true){
+				counter++;
+				Socket serverClient=server.accept();  //server accept the client connection request
+				DefaultTableModel model = (DefaultTableModel) frame.table_server.getModel();
+				model.addRow(new Object[]{"Column 1", "Column 2", "Column 3"});
+//				frame.table_server.(1, new Object[]{1, "Client No:" + counter, "connect succecss", "ket noi thanh cong"});
+				System.out.println(" >> " + "Client No:" + counter + " started!");
+				ServerClientThread sct = new ServerClientThread(serverClient,counter); //send  the request to a separate thread
+				sct.start();
+			}
+		}catch(Exception e){
+			System.out.println(e);
+		}
 //		FormServer frame = new FormServer();
 //		frame.setVisible(true);
-				EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					FormServer frame = new FormServer();
-					frame.setVisible(true);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		});
+				//EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					FormServer frame = new FormServer();
+//					frame.setVisible(true);
+//				} catch (Exception ex) {
+//					ex.printStackTrace();
+//				}
+//			}
+//		});
 	}
 
 	/**
@@ -113,8 +132,8 @@ public class FormServer extends JFrame {
 				System.out.println(serverClient);
 				System.out.println(" >> " + "Client No:" + counter + " started!");
 				model.insertRow(1, new Object[]{1, "Client No:" + counter, "connect succecss", "ket noi thanh cong"});
-				ServerClientThread sct = new ServerClientThread(serverClient,counter); //send  the request to a separate thread
-				sct.start();
+//				ServerClientThread sct = new ServerClientThread(serverClient,counter); //send  the request to a separate thread
+//				sct.start();
 			}
 		}catch(Exception e){
 			System.out.println(e);
