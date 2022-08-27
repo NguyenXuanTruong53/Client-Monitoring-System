@@ -12,6 +12,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.ServerSocket;
@@ -27,13 +29,15 @@ public class FormServer extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+//		FormServer frame = new FormServer();
+//		frame.setVisible(true);
 				EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					FormServer frame = new FormServer();
 					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
 			}
 		});
@@ -98,19 +102,20 @@ public class FormServer extends JFrame {
 
 			int counter=0;
 			System.out.println("Server Started ....");
-			Socket serverClient=server.accept();  //server accept the client connection request
-			System.out.println(" >> " + "Client No:" + counter + " started!");
-			model.insertRow(1, new Object[]{1, "Client No:" + counter, "connect succecss", "ket noi thanh cong"});
-			ServerClientThread sct = new ServerClientThread(serverClient,counter); //send  the request to a separate thread
-			sct.start();
-//			while(true){
-//				counter++;
-//				Socket serverClient=server.accept();  //server accept the client connection request
-//				System.out.println(" >> " + "Client No:" + counter + " started!");
-//				model.insertRow(1, new Object[]{1, "Client No:" + counter, "connect succecss", "ket noi thanh cong"});
-//				ServerClientThread sct = new ServerClientThread(serverClient,counter); //send  the request to a separate thread
-//				sct.start();
-//			}
+//			Socket serverClient=server.accept();  //server accept the client connection request
+//			System.out.println(" >> " + "Client No:" + counter + " started!");
+//			model.insertRow(1, new Object[]{1, "Client No:" + counter, "connect succecss", "ket noi thanh cong"});
+//			ServerClientThread sct = new ServerClientThread(serverClient,counter); //send  the request to a separate thread
+//			sct.start();
+			while(true){
+				counter++;
+				Socket serverClient=server.accept();  //server accept the client connection request
+				System.out.println(serverClient);
+				System.out.println(" >> " + "Client No:" + counter + " started!");
+				model.insertRow(1, new Object[]{1, "Client No:" + counter, "connect succecss", "ket noi thanh cong"});
+				ServerClientThread sct = new ServerClientThread(serverClient,counter); //send  the request to a separate thread
+				sct.start();
+			}
 		}catch(Exception e){
 			System.out.println(e);
 		}
@@ -129,22 +134,29 @@ class ServerClientThread extends Thread {
 			DataInputStream inStream = new DataInputStream(serverClient.getInputStream());
 			DataOutputStream outStream = new DataOutputStream(serverClient.getOutputStream());
 			String clientMessage="", serverMessage="";
-			while(!clientMessage.equals("bye")){
-				clientMessage=inStream.readUTF();
-				System.out.println("From Client-" +clientNo+ ": Number is :"+clientMessage);
-				squre = Integer.parseInt(clientMessage) * Integer.parseInt(clientMessage);
-				serverMessage="From Server to Client-" + clientNo + " Square of " + clientMessage + " is " +squre;
-				outStream.writeUTF(serverMessage);
-				outStream.flush();
-			}
-			inStream.close();
-			outStream.close();
-			serverClient.close();
+			clientMessage=inStream.readUTF();
+			System.out.println("From Client-" +clientNo+ ": Number is :"+clientMessage);
+			squre = Integer.parseInt(clientMessage) * Integer.parseInt(clientMessage);
+			serverMessage="From Server to Client-" + clientNo + " Square of " + clientMessage + " is " +squre;
+			outStream.writeUTF(serverMessage);
+			outStream.flush();
+//			while(!clientMessage.equals("bye")){
+//				clientMessage=inStream.readUTF();
+//				System.out.println("From Client-" +clientNo+ ": Number is :"+clientMessage);
+//				squre = Integer.parseInt(clientMessage) * Integer.parseInt(clientMessage);
+//				serverMessage="From Server to Client-" + clientNo + " Square of " + clientMessage + " is " +squre;
+//				outStream.writeUTF(serverMessage);
+//				outStream.flush();
+//			}
+//			inStream.close();
+//			outStream.close();
+//			serverClient.close();
 		}catch(Exception ex){
 			System.out.println(ex);
-		}finally{
-			System.out.println("Client -" + clientNo + " exit!! ");
 		}
+//		finally{
+//			System.out.println("Client -" + clientNo + " exit!! ");
+//		}
 	}
 }
 
