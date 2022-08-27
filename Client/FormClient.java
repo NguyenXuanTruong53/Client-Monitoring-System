@@ -12,6 +12,17 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+//package com.gpcoder.watchservice;
+
+
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -102,11 +113,11 @@ public class FormClient extends JFrame {
 					DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
 					BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 					String clientMessage = "", serverMessage = "";
-					System.out.println("Enter number :");
 					clientMessage = br.readLine();
 					outStream.writeUTF(clientMessage);
 					outStream.flush();
 					serverMessage = inStream.readUTF();
+					model.insertRow(1, new Object[]{1, "12", serverMessage, "ket noi thanh cong"});
 					System.out.println(serverMessage);
 //					while (!clientMessage.equals("bye")) {
 //

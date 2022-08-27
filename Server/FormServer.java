@@ -18,9 +18,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.*;
 
 public class FormServer extends JFrame {
-
+	private String message;
 	private JPanel contentPane;
 	private JTable table;
 	public DefaultTableModel model = new DefaultTableModel();
@@ -35,6 +36,14 @@ public class FormServer extends JFrame {
 			ServerSocket server=new ServerSocket(8888);
 			int counter=0;
 			System.out.println("Server Started ....");
+			WatchService watcher = FileSystems.getDefault().newWatchService();
+			Path dir = Paths.get("C:/Test/abc");
+			dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE,
+					StandardWatchEventKinds.ENTRY_MODIFY);
+
+			System.out.println("Watch Service registered for dir: " + dir.getFileName());
+
+			WatchKey key = null;
 			while(true){
 				counter++;
 				Socket serverClient=server.accept();  //server accept the client connection request
@@ -42,24 +51,55 @@ public class FormServer extends JFrame {
 				model.addRow(new Object[]{"Column 1", "Column 2", "Column 3"});
 //				frame.table_server.(1, new Object[]{1, "Client No:" + counter, "connect succecss", "ket noi thanh cong"});
 				System.out.println(" >> " + "Client No:" + counter + " started!");
-				ServerClientThread sct = new ServerClientThread(serverClient,counter); //send  the request to a separate thread
-				sct.start();
+
+
+				while (true) {
+					try {
+						// System.out.println("Waiting for key to be signalled...");
+						key = watcher.take();
+					} catch (InterruptedException ex) {
+						System.out.println("InterruptedException: " + ex.getMessage());
+						return;
+					}
+
+					for (WatchEvent<?> event : key.pollEvents()) {
+						// Retrieve the type of event by using the kind() method.
+						WatchEvent.Kind<?> kind = event.kind();
+						WatchEvent<Path> ev = (WatchEvent<Path>) event;
+						Path fileName = ev.context();
+						String strLog = "ttt";
+						if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+
+							strLog = "A new file was created" +" "+ fileName.getFileName();
+
+							model.addRow(new Object[]{"C:/Test/abc", "\"Client No:\" + counter + \" ", "created", strLog});
+							System.out.println(strLog);
+							System.out.println(kind);
+
+						} else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+
+							strLog = "A new file %s was modified.%n" + fileName.getFileName();
+							model.addRow(new Object[]{"C:/Test/abc", "\"Client No:\" + counter + \" ", "modified", strLog});
+							System.out.printf("A file %s was modified.%n", fileName.getFileName());
+						} else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+							strLog = "A new file %s was modified.%n" + fileName.getFileName();
+							model.addRow(new Object[]{"C:/Test/abc", "\"Client No:\" + counter + \" ", "deleted", strLog});
+							System.out.printf("A file %s was deleted.%n", fileName.getFileName());
+						}
+						ServerClientThread sct = new ServerClientThread(serverClient,counter,strLog); //send  the request to a separate thread
+						sct.start();
+					}
+
+					boolean valid = key.reset();
+					if (!valid) {
+						break;
+					}
+				}
+
 			}
 		}catch(Exception e){
 			System.out.println(e);
 		}
-//		FormServer frame = new FormServer();
-//		frame.setVisible(true);
-				//EventQueue.invokeLater(new Runnable() {
-//			public void run() {
-//				try {
-//					FormServer frame = new FormServer();
-//					frame.setVisible(true);
-//				} catch (Exception ex) {
-//					ex.printStackTrace();
-//				}
-//			}
-//		});
 	}
 
 	/**
@@ -144,9 +184,11 @@ class ServerClientThread extends Thread {
 	Socket serverClient;
 	int clientNo;
 	int squre;
-	ServerClientThread(Socket inSocket,int counter){
+	String data;
+	ServerClientThread(Socket inSocket,int counter, String strLog){
 		serverClient = inSocket;
 		clientNo=counter;
+		data=strLog;
 	}
 	public void run(){
 		try{
@@ -156,7 +198,8 @@ class ServerClientThread extends Thread {
 			clientMessage=inStream.readUTF();
 			System.out.println("From Client-" +clientNo+ ": Number is :"+clientMessage);
 			squre = Integer.parseInt(clientMessage) * Integer.parseInt(clientMessage);
-			serverMessage="From Server to Client-" + clientNo + " Square of " + clientMessage + " is " +squre;
+			System.out.println(data);
+			serverMessage=data;
 			outStream.writeUTF(serverMessage);
 			outStream.flush();
 //			while(!clientMessage.equals("bye")){
